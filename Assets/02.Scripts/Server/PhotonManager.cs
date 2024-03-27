@@ -9,9 +9,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     void Start()
     {
         PhotonNetwork.GameVersion = "0.0.1";
-        PhotonNetwork.NickName = $"정성훈_{UnityEngine.Random.Range(0,100)}";
+        PhotonNetwork.NickName = $"96년생_정성훈_{UnityEngine.Random.Range(0,100)}";
         PhotonNetwork.ConnectUsingSettings();
-        
+
+        PhotonNetwork.SendRate = 50;
+        PhotonNetwork.SerializationRate = 30;
+
+
     }
     public override void OnConnected()
     {
@@ -36,7 +40,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnCreatedRoom()
     {
         //Debug.Log("방 생성");
-        //Debug.Log(PhotonNetwork.CurrentRoom.Name);
+        //Debug.Log(PhotonNetwork.CurrentRoom.Name);   
+    }
+    public override void OnJoinedRoom()
+    {
+        GameObject player =  PhotonNetwork.Instantiate("Character", Vector3.zero, Quaternion.identity);
+        PlayerFindManager.Instance.character = player;
+        PlayerFindManager.Instance.InIt();
         
     }
 

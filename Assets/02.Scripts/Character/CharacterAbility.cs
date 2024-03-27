@@ -9,5 +9,6 @@ public class CharacterAbility : MonoBehaviour
     private void Awake()
     {   
         _owner = GetComponent<Character>();
+        
     }
 }

@@ -1,3 +1,4 @@
+using Photon.Pun;
 using UnityEngine;
 using static UnityEngine.UI.GridLayoutGroup;
 
@@ -5,36 +6,64 @@ using static UnityEngine.UI.GridLayoutGroup;
 [RequireComponent(typeof(Animator))]
 public class CharacterMoveAbility : CharacterAbility
 {
-    public float rotationSpeed = 10.0f; // 캐릭터 회전속도
+    public float rotationSpeed = 10.0f; // 캐릭터 방향 회전속도
     public float gravity = -9.81f;
+    private int staminaDepletionTate = 10;
+    private bool isRunnig = false;
 
     private CharacterController controller;
-    public Animator mAnimator;
+    private Animator mAnimator;
     private Vector3 velocity;
+
+
     void Start()
     {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Confined;
-
+        mAnimator = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
+
+        
     }
+
     void Update()
     {
+        if (!_owner.PhotonView.IsMine)
+            return;
+
         CharacterMove();
         Gravity();
+        HandleStamina();
     }
     private void CharacterMove()
     {
+        
+
         // WASD 키 입력 받기
         float moveHorizontal = Input.GetAxisRaw("Horizontal");
         float moveVertical = Input.GetAxisRaw("Vertical");
 
-        // 움직임 벡터 계산
+
         Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical);
         movement.Normalize();
         mAnimator.SetFloat("Move", movement.magnitude);
         movement = Camera.main.transform.TransformDirection(movement);
-        movement *= _owner.state.MoveSpeed;
+
+        if (Input.GetKey(KeyCode.LeftShift) && _owner.state.Stamina > 0)
+        {
+            isRunnig = true;
+            movement *= _owner.state.RunSpeed;
+        }
+        else
+        {
+            if (Input.GetKeyUp(KeyCode.LeftShift))
+                isRunnig = false;
+
+            movement *= _owner.state.MoveSpeed;
+        }
+
+        // 움직임 벡터 계산
+
 
 
         if (movement.magnitude >= 0.1f)
@@ -51,6 +80,19 @@ public class CharacterMoveAbility : CharacterAbility
         
 
         // 캐릭터 이동 적용
+    }
+    private void HandleStamina()
+    {
+        if (isRunnig)
+        {
+            _owner.state.Stamina -= staminaDepletionTate * Time.deltaTime;
+            _owner.state.Stamina = Mathf.Max(_owner.state.Stamina, 0);
+        }
+        else
+        {
+            _owner.state.Stamina += _owner.state.StaminaRecovery * Time.deltaTime;
+            _owner.state.Stamina = Mathf.Min(_owner.state.Stamina, _owner.state.MaxStamina);
+        }
     }
     private void Gravity()
     {
