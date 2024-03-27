@@ -7,7 +7,8 @@ using UnityEngine;
 public class State 
 {
     public int MaxHealth;
-    public int Health;
+    public float Health;
+    public int Damage;
     public float MaxStamina;
     public float Stamina;
     public float MoveSpeed;

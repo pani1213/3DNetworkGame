@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - FollowCamera
+  - Bullet
+  - VFX_FootStep
   layers:
   - Default
   - TransparentFX
@@ -13,7 +15,7 @@ TagManager:
   - Water
   - UI
   - Player
-  - 
+  - Invisivble
   - 
   - 
   - 
@@ -44,4 +46,7 @@ TagManager:
     locked: 0
   - name: UI
     uniqueID: 856554101
+    locked: 0
+  - name: Particle
+    uniqueID: 569672809
     locked: 0

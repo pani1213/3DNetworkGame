@@ -16,6 +16,7 @@ public class PetMoveAbility : MonoBehaviour
     public float rotationSpeed = 5.0f;
 
     private bool isFly;
+    private float footStpeCoolTime;
     private void Start()
     {
         mAnimator = GetComponent<Animator>();
@@ -56,7 +57,16 @@ public class PetMoveAbility : MonoBehaviour
         mAnimator.SetBool("isFly", isFly);
         if (distance > stopDistance)
         {
-            isFly= true;
+            footStpeCoolTime += Time.deltaTime;
+            if (footStpeCoolTime > 0.5f)
+            {
+                GameObject VFX = ObjectPooler.instance.GetPoolObject("VFX_FootStep");
+                VFX.SetActive(true);
+                VFX.transform.position = transform.position;
+                footStpeCoolTime = 0;
+            }
+
+                isFly = true;
             mAnimator.SetBool("isFly", isFly);
             // 지형을 따라 이동하려면, 수평 방향의 움직임에만 집중하고, Y 축은 변경하지 않습니다.
             controller.Move(direction * speed * Time.deltaTime);

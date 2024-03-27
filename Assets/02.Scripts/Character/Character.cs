@@ -5,7 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterMoveAbility))]
 [RequireComponent(typeof(CharacterRotateAbility))]
 [RequireComponent(typeof(CharacterAttackAbility))]
-public class Character : MonoBehaviour , IPunObservable
+public class Character : MonoBehaviour , IPunObservable , IDamaged
 {
     public PhotonView PhotonView;
     public State state;
@@ -25,18 +25,15 @@ public class Character : MonoBehaviour , IPunObservable
         {
             recevedPosition = (Vector3)stream.ReceiveNext();
             recevedRotation = (Quaternion)stream.ReceiveNext();
-            state.Health = (int)stream.ReceiveNext();
+            state.Health = (float)stream.ReceiveNext();
             state.Stamina = (float)stream.ReceiveNext();
         }
       
     }
-
-    private void Start()
-    {
+    private void Awake()
+    { 
         PhotonView = GetComponent<PhotonView>();
-
     }
-
     public void Update()
     {
         if (!PhotonView.IsMine)
@@ -44,7 +41,14 @@ public class Character : MonoBehaviour , IPunObservable
             transform.position = Vector3.Lerp(transform.position, recevedPosition, Time.deltaTime * 20);
             transform.rotation = Quaternion.Slerp(transform.rotation, recevedRotation, Time.deltaTime * 20);
         }
-
-
+    }
+    [PunRPC]
+    public void Dameged(int _damage)
+    {
+        state.Health -= _damage;
+        if (state.Health <= 0)
+        {
+            
+        }
     }
 }

@@ -15,15 +15,13 @@ public class CharacterMoveAbility : CharacterAbility
     private Animator mAnimator;
     private Vector3 velocity;
 
-
+    private float footStpeCoolTime;
     void Start()
     {
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Confined;
+       
         mAnimator = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
 
-        
     }
 
     void Update()
@@ -64,17 +62,21 @@ public class CharacterMoveAbility : CharacterAbility
 
         // 움직임 벡터 계산
 
-
-
         if (movement.magnitude >= 0.1f)
         {
-      
+            footStpeCoolTime += Time.deltaTime;
+            if (footStpeCoolTime > 0.5f)
+            {
+                GameObject VFX = ObjectPooler.instance.GetPoolObject("VFX_FootStep");
+                VFX.SetActive(true);
+                VFX.transform.position = transform.position;
+                footStpeCoolTime = 0;
+            }
             float targetAngle = Mathf.Atan2(movement.x, movement.z) * Mathf.Rad2Deg;
             Quaternion targetRotation = Quaternion.Euler(0f, targetAngle, 0f);
 
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         
-
             controller.Move(movement * Time.deltaTime);
         }
         

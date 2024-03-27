@@ -5,6 +5,13 @@ using Photon.Pun;
 using Photon.Realtime;
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
+    public static PhotonManager instance;
+    public bool isJoindRoom = false;
+    private void Awake()
+    {
+        if (instance == null)
+            instance = this;
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -14,8 +21,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
         PhotonNetwork.SendRate = 50;
         PhotonNetwork.SerializationRate = 30;
-
-
     }
     public override void OnConnected()
     {
@@ -44,11 +49,13 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
-        GameObject player =  PhotonNetwork.Instantiate("Character", Vector3.zero, Quaternion.identity);
+        isJoindRoom =true;
+    }
+    public void CreatedCharacter()
+    {
+        GameObject player = PhotonNetwork.Instantiate("Character", Vector3.zero, Quaternion.identity);
         PlayerFindManager.Instance.character = player;
         PlayerFindManager.Instance.InIt();
-        
     }
-
 
 }
