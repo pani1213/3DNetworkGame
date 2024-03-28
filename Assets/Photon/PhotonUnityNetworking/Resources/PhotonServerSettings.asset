@@ -41,6 +41,10 @@ MonoBehaviour:
   - RespawnSpaceship
   - PlayAttackAnimation
   - Dameged
+  - OffDedAni
+  - ActiveObject
+  - Respawn
+  - RandomPos
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

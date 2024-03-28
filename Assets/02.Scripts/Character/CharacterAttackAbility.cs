@@ -5,7 +5,6 @@ using Photon.Pun;
 
 public class CharacterAttackAbility : CharacterAbility
 {
-    public Animator mAnimator;
     float coolTime =1;
     private int mAttackStamina =20;
     public Collider wearponCollider;
@@ -14,8 +13,9 @@ public class CharacterAttackAbility : CharacterAbility
     // Update is called once per frame
     void Update()
     {
-        if (!_owner.PhotonView.IsMine)
+        if (!_owner.PhotonView.IsMine || _owner.state.isDed)
             return;
+
         coolTime += Time.deltaTime;
         if (coolTime > _owner.state.AttackCoolTime && Input.GetMouseButtonDown(0) && _owner.state.Stamina > mAttackStamina)
         {
@@ -47,8 +47,7 @@ public class CharacterAttackAbility : CharacterAbility
 
             damageds.Add(obj);
 
-            GameObject vfxObj = PhotonNetwork.Instantiate("HitVFX", Vector3.zero,Quaternion.identity);
-            vfxObj.transform.position = ((other.transform.position + transform.position) / 2f) + (Vector3.up * 0.7f);
+            GameObject vfxObj = PhotonNetwork.Instantiate("HitVFX",((other.transform.position + transform.position) / 2f) + (Vector3.up * 0.7f), Quaternion.identity);
             vfxObj.GetComponent<ParticleSystem>().Play();
 
 
@@ -62,6 +61,6 @@ public class CharacterAttackAbility : CharacterAbility
     [PunRPC]
     public void PlayAttackAnimation(int index)
     {
-        mAnimator.SetTrigger($"Attack0{index}");
+        _owner.mAnimator.SetTrigger($"Attack0{index}");
     }
 }

@@ -51,11 +51,5 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         isJoindRoom =true;
     }
-    public void CreatedCharacter()
-    {
-        GameObject player = PhotonNetwork.Instantiate("Character", Vector3.zero, Quaternion.identity);
-        PlayerFindManager.Instance.character = player;
-        PlayerFindManager.Instance.InIt();
-    }
 
 }

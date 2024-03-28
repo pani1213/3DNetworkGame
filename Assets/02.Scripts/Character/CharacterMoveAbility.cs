@@ -3,7 +3,6 @@ using UnityEngine;
 using static UnityEngine.UI.GridLayoutGroup;
 
 [RequireComponent(typeof(CharacterController))]
-[RequireComponent(typeof(Animator))]
 public class CharacterMoveAbility : CharacterAbility
 {
     public float rotationSpeed = 10.0f; // 캐릭터 방향 회전속도
@@ -12,14 +11,11 @@ public class CharacterMoveAbility : CharacterAbility
     private bool isRunnig = false;
 
     private CharacterController controller;
-    private Animator mAnimator;
     private Vector3 velocity;
 
     private float footStpeCoolTime;
     void Start()
     {
-       
-        mAnimator = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
 
     }
@@ -29,7 +25,8 @@ public class CharacterMoveAbility : CharacterAbility
         if (!_owner.PhotonView.IsMine)
             return;
 
-        CharacterMove();
+        if (!_owner.state.isDed)
+            CharacterMove();
         Gravity();
         HandleStamina();
     }
@@ -44,7 +41,7 @@ public class CharacterMoveAbility : CharacterAbility
 
         Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical);
         movement.Normalize();
-        mAnimator.SetFloat("Move", movement.magnitude);
+        _owner.mAnimator.SetFloat("Move", movement.magnitude);
         movement = Camera.main.transform.TransformDirection(movement);
 
         if (Input.GetKey(KeyCode.LeftShift) && _owner.state.Stamina > 0)

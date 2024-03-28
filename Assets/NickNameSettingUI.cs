@@ -18,7 +18,7 @@ public class NickNameSettingUI : MonoBehaviour
         else
             PhotonNetwork.NickName = $"검객_{UnityEngine.Random.Range(0, 100)}";
 
-        PhotonManager.instance.CreatedCharacter();
+        RespawnerManager.Instance.RespawnCharacter();
 
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Confined;

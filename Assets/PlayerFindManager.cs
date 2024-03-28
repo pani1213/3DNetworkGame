@@ -10,11 +10,11 @@ public class PlayerFindManager : Singleton<PlayerFindManager>
     public CinemachineFreeLook freeLookCamera;
     public void InIt()
     {
-
         playerCharacter = character.GetComponent<Character>();
         freeLookCamera.Follow = character.transform;
         freeLookCamera.LookAt = character.transform;
         CharacterStateUI.Instance.InIt();
     }
+
 
 }
