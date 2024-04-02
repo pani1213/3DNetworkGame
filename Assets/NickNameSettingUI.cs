@@ -21,7 +21,7 @@ public class NickNameSettingUI : MonoBehaviour
         RespawnerManager.Instance.RespawnCharacter();
 
         Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.lockState = CursorLockMode.Locked;
         gameObject.SetActive(false);
     }
 }

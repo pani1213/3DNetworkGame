@@ -522,7 +522,6 @@ namespace Photon.Pun
                 }
             }
         }
-
         public void DeserializeView(PhotonStream stream, PhotonMessageInfo info)
         {
             if (this.ObservedComponents != null && this.ObservedComponents.Count > 0)

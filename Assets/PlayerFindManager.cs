@@ -15,6 +15,4 @@ public class PlayerFindManager : Singleton<PlayerFindManager>
         freeLookCamera.LookAt = character.transform;
         CharacterStateUI.Instance.InIt();
     }
-
-
 }

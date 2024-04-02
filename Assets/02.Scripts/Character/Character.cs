@@ -2,18 +2,20 @@ using Cinemachine;
 using Photon.Pun;
 using System.Collections;
 using UnityEngine;
-
+using UnityEngine.UIElements;
 
 [RequireComponent(typeof(CharacterMoveAbility))]
 [RequireComponent(typeof(CharacterRotateAbility))]
 [RequireComponent(typeof(CharacterAttackAbility))]
 [RequireComponent(typeof(Animator))]
-public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction
+public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction 
 {
     public PhotonView PhotonView;
     public State state;
     [SerializeField] private CinemachineImpulseSource _source;
     public Animator mAnimator;
+    public CharacterController controller;
+    public Collider CharacterCollider;
     Vector3 recevedPosition;
     Quaternion recevedRotation;
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
@@ -31,13 +33,13 @@ public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction
             //recevedRotation = (Quaternion)stream.ReceiveNext();
             state.Health = (float)stream.ReceiveNext();
             state.Stamina = (float)stream.ReceiveNext();
-        }
-      
+        } 
     }
     private void Awake()
     { 
         PhotonView = GetComponent<PhotonView>();
         mAnimator = GetComponent<Animator>();
+        CharacterCollider = GetComponent<Collider>();
     }
     public void Update()
     {
@@ -61,6 +63,7 @@ public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction
     {
         state.Health -= _damage;
 
+
         if (PhotonView.IsMine)
         { 
             _source.GenerateImpulse();
@@ -74,15 +77,20 @@ public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction
     public void Died()
     {
         mAnimator.SetBool("IsDed", true);
+
         state.isDed = true;
+  
         StartCoroutine(DiedAction());
     }
     public IEnumerator DiedAction()
     {
         yield return new WaitForSeconds(0.5f);
         PhotonView.RPC("ActiveObject", RpcTarget.All,false);
+
+        if(PhotonView.IsMine)
+        ItemObjectFactory.Instance.RequestCreate(transform.position);
         yield return new WaitForSeconds(1f); // 리스폰 시간
-                                             //PhotonView.RPC("Respawn", RpcTarget.All,gameObject);
+        //PhotonView.RPC("Respawn", RpcTarget.All,gameObject);
         RespawnerManager.Instance.Respawn(GetComponent<CharacterController>(),gameObject);
         PhotonView.RPC("OffDedAni", RpcTarget.All);
         state.InIt();
@@ -92,6 +100,7 @@ public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction
     private void ActiveObject(bool _onAndOff)
     {
         gameObject.transform.GetChild(0).gameObject.SetActive(_onAndOff);
+        CharacterCollider.enabled = _onAndOff;
     }
     [PunRPC]
     private void OffDedAni()
@@ -117,4 +126,6 @@ public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction
         }
         transform.GetChild(0).localPosition = originalPosition;
     }
+
+
 }

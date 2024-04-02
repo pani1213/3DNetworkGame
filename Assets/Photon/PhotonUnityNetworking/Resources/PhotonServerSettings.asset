@@ -45,6 +45,15 @@ MonoBehaviour:
   - ActiveObject
   - Respawn
   - RandomPos
+  - JumpAttack
+  - EmoticonOff
+  - EmoticonOn
+  - SelectSprite
+  - IDropItem.DropItem
+  - DropItem
+  - Create
+  - Delete
+  - PlayParticle
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

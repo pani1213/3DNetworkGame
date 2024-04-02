@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CharacterAbility : MonoBehaviour
 {
-    protected Character _owner;
+    public Character _owner;
 
     private void Awake()
     {   

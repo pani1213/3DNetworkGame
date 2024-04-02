@@ -16,8 +16,9 @@ public class State
     public float RotationSpeed;
     public float AttackCoolTime;
     public float StaminaRecovery;
+    public float JumpPower;
     public bool isDed;
-
+    public float Score;
     public void InIt()
     {
         Health = MaxHealth;

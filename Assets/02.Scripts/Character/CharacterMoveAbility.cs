@@ -5,44 +5,52 @@ using static UnityEngine.UI.GridLayoutGroup;
 [RequireComponent(typeof(CharacterController))]
 public class CharacterMoveAbility : CharacterAbility
 {
+    public float groundDistance = 0.4f;
+    public LayerMask groundMask;
+
     public float rotationSpeed = 10.0f; // 캐릭터 방향 회전속도
+
+    public float _yVelocity;
     public float gravity = -9.81f;
     private int staminaDepletionTate = 10;
     private bool isRunnig = false;
+    private bool groundedPlayer;
 
     private CharacterController controller;
-    private Vector3 velocity;
-
     private float footStpeCoolTime;
     void Start()
     {
         controller = GetComponent<CharacterController>();
-
     }
-
     void Update()
     {
         if (!_owner.PhotonView.IsMine)
             return;
 
         if (!_owner.state.isDed)
+        {
+            Jump();
             CharacterMove();
-        Gravity();
+        }
         HandleStamina();
     }
     private void CharacterMove()
     {
-        
-
         // WASD 키 입력 받기
         float moveHorizontal = Input.GetAxisRaw("Horizontal");
         float moveVertical = Input.GetAxisRaw("Vertical");
 
-
         Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical);
+
         movement.Normalize();
         _owner.mAnimator.SetFloat("Move", movement.magnitude);
         movement = Camera.main.transform.TransformDirection(movement);
+
+
+        //중력
+        movement.y = _yVelocity;
+        _yVelocity += gravity * Time.deltaTime;
+
 
         if (Input.GetKey(KeyCode.LeftShift) && _owner.state.Stamina > 0)
         {
@@ -53,32 +61,37 @@ public class CharacterMoveAbility : CharacterAbility
         {
             if (Input.GetKeyUp(KeyCode.LeftShift))
                 isRunnig = false;
-
             movement *= _owner.state.MoveSpeed;
         }
 
-        // 움직임 벡터 계산
-
-        if (movement.magnitude >= 0.1f)
+        //인풋 있을때만 실행
+        if (moveHorizontal != 0f || moveVertical!= 0f)
         {
+            Debug.Log(0);
             footStpeCoolTime += Time.deltaTime;
             if (footStpeCoolTime > 0.5f)
             {
-                GameObject VFX = ObjectPooler.instance.GetPoolObject("VFX_FootStep");
-                VFX.SetActive(true);
-                VFX.transform.position = transform.position;
-                footStpeCoolTime = 0;
+               GameObject VFX = ObjectPooler.instance.GetPoolObject("VFX_FootStep");
+               VFX.SetActive(true);
+               VFX.transform.position = transform.position;
+               footStpeCoolTime = 0;
             }
+
             float targetAngle = Mathf.Atan2(movement.x, movement.z) * Mathf.Rad2Deg;
             Quaternion targetRotation = Quaternion.Euler(0f, targetAngle, 0f);
-
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-        
-            controller.Move(movement * Time.deltaTime);
         }
-        
-
+        controller.Move(movement * (_owner.state.MoveSpeed * Time.deltaTime));
         // 캐릭터 이동 적용
+    }
+    public void Jump()
+    {
+        groundedPlayer = controller.isGrounded;
+        if (Input.GetButtonDown("Jump") && groundedPlayer && _owner.state.Stamina > 10)
+        {
+            _owner.state.Stamina -= 10;
+            _yVelocity = _owner.state.JumpPower;
+        }
     }
     private void HandleStamina()
     {
@@ -92,14 +105,5 @@ public class CharacterMoveAbility : CharacterAbility
             _owner.state.Stamina += _owner.state.StaminaRecovery * Time.deltaTime;
             _owner.state.Stamina = Mathf.Min(_owner.state.Stamina, _owner.state.MaxStamina);
         }
-    }
-    private void Gravity()
-    {
-        if (controller.isGrounded)
-            velocity.y = 0f; // 땅에 닿으면 수직 속도를 0으로 리셋
-        else
-            velocity.y += gravity * Time.deltaTime; // 땅에 닿아 있지 않으면 중력을 계속 적용
-        // 중력에 의한 움직임 적용
-        controller.Move(velocity * Time.deltaTime);
     }
 }

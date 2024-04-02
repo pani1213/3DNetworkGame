@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ItemObjectContainer : Singleton<ItemObjectContainer>
 {
-    public GameObject[] ItemObjects,ItemEffectObjects;
+    public GameObject[] ItemObjects;
 
 
 

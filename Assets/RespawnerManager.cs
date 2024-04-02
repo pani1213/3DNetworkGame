@@ -15,7 +15,6 @@ public class RespawnerManager : Singleton<RespawnerManager>
     }
     public void Respawn(CharacterController _player,GameObject _gameObject)
     {
-        Debug.Log(UnityEngine.Random.Range(0, respawnerPos.Length));
         _player.enabled = false;
         _gameObject.transform.position = respawnerPos[UnityEngine.Random.Range(0, respawnerPos.Length)].transform.position;
         _player.enabled = true;
