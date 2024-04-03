@@ -63,7 +63,6 @@ public class CharacterMoveAbility : CharacterAbility
                 isRunnig = false;
             movement *= _owner.state.MoveSpeed;
         }
-
         //인풋 있을때만 실행
         if (moveHorizontal != 0f || moveVertical!= 0f)
         {
