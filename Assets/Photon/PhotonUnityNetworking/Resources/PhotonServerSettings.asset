@@ -58,6 +58,9 @@ MonoBehaviour:
   - ChestSetActive
   - CreateOneType
   - SetActiveFalse
+  - SetProperties
+  - SetScore
+  - GrowUpWearpon
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

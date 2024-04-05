@@ -29,8 +29,9 @@ public class CharacterItemGetAbility : CharacterAbility
                         Debug.Log(_owner.state.Stamina);
                     break;
                 case ItemType.coin:
-                    _owner.state.Score += increaseStat.Value;
-                    Debug.Log(_owner.state.Score);
+                    _owner.AddScore((int)increaseStat.Value);
+                    //_owner.state.Score += increaseStat.Value;
+                
                     break;
             }
         }

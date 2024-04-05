@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using Unity.VisualScripting;
 using UnityEngine;
 [RequireComponent(typeof(PhotonView))]
 public class ItemRandomSpawnManager : Singleton<ItemRandomSpawnManager>
@@ -42,7 +43,7 @@ public class ItemRandomSpawnManager : Singleton<ItemRandomSpawnManager>
     public void ChestSetActive(bool _onOff, int index)
     {
         itemChests[index].gameObject.SetActive(_onOff);
-        IsOn = true;
+        IsOn = _onOff;
     }
     public IEnumerator RandomSpawn(int index)
     {
@@ -56,20 +57,19 @@ public class ItemRandomSpawnManager : Singleton<ItemRandomSpawnManager>
             count++;
         }
         itemChests[index].GetComponent<Rigidbody>().isKinematic = false;
-        PhotonView.RPC(nameof(SetActiveFalse), RpcTarget.AllBuffered, index);
+
+        PhotonView.RPC(nameof(ChestSetActive), RpcTarget.AllBuffered, false,index);
        
         
     }
-    [PunRPC]
-    public void SetActiveFalse( int index)
-    {
-        itemChests[index].gameObject.SetActive(false);
-        if (PhotonNetwork.IsMasterClient && PhotonView.IsMine)
-        {
-            ChestPos[index] = false;
-            IsOn = false;
-        }
-    }
+    //[PunRPC]
+    //public void SetActiveFalse( int index)
+    //{
+    //    itemChests[index].gameObject.SetActive(false);
+    //        ChestPos[index] = false;
+    //        IsOn = false;
+    //    
+    //}
 }
 public struct ChestPosData
 {

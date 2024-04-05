@@ -2,7 +2,11 @@ using Cinemachine;
 using Photon.Pun;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.SocialPlatforms;
+using UnityEngine.SocialPlatforms.Impl;
+using static UnityEngine.UI.GridLayoutGroup;
+
+
 
 [RequireComponent(typeof(CharacterMoveAbility))]
 [RequireComponent(typeof(CharacterRotateAbility))]
@@ -16,8 +20,10 @@ public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction
     public Animator mAnimator;
     public CharacterController controller;
     public Collider CharacterCollider;
+    public int myScore;
     Vector3 recevedPosition;
     Quaternion recevedRotation;
+    public GameObject WearPon;
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
@@ -35,11 +41,51 @@ public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction
             state.Stamina = (float)stream.ReceiveNext();
         } 
     }
+    private void Start()
+    {
+        if (!PhotonView.IsMine)
+            return;
+
+        ExitGames.Client.Photon.Hashtable hashtable = new ExitGames.Client.Photon.Hashtable();
+        hashtable.Add("Score", 0);
+        hashtable.Add("KillCount", 0);
+        PhotonNetwork.LocalPlayer.SetCustomProperties(hashtable);
+    }
     private void Awake()
     { 
         PhotonView = GetComponent<PhotonView>();
         mAnimator = GetComponent<Animator>();
         CharacterCollider = GetComponent<Collider>();
+
+    }
+    // addintValue 를 사용하여 int 값 받는 요소들 변경하기
+    public void AddIntValue(string key, int value)
+    {
+        ExitGames.Client.Photon.Hashtable myHashtable = PhotonNetwork.LocalPlayer.CustomProperties;
+        myHashtable["Score"] = (int)myHashtable["Score"] + value;
+        PhotonNetwork.LocalPlayer.SetCustomProperties(myHashtable);
+    }
+    public void AddScore(int score)
+    {
+        ExitGames.Client.Photon.Hashtable myHashtable = PhotonNetwork.LocalPlayer.CustomProperties;
+        myHashtable["Score"] = (int)myHashtable["Score"] + score;
+        PhotonView.RPC(nameof(SetScore), RpcTarget.All, myHashtable);
+        int count = myScore / 100;
+        if (count > 0)
+        {
+            PhotonView.RPC(nameof(GrowUpWearpon), RpcTarget.All, count);
+        }
+        PhotonNetwork.LocalPlayer.SetCustomProperties(myHashtable);
+    }
+    [PunRPC]
+    private void GrowUpWearpon(int count)
+    {
+        WearPon.transform.localScale = Vector3.one * count;
+    }
+    [PunRPC]
+    private void SetScore(ExitGames.Client.Photon.Hashtable hashtable)
+    {
+        myScore = (int)hashtable["Score"];
     }
     public void Update()
     {
@@ -59,7 +105,7 @@ public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction
        //}
     }
     [PunRPC]
-    public void Dameged(int _damage)
+    public void Dameged(int _damage,int actorNum)
     {
         state.Health -= _damage;
 
@@ -71,17 +117,45 @@ public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction
         }
         StartCoroutine(IHit());
         if (state.Health <= 0)
+        {
+            ExitGames.Client.Photon.Hashtable myHashtable = PhotonNetwork.CurrentRoom.GetPlayer(actorNum).CustomProperties;
+            myHashtable["KillCount"] = (int)myHashtable["KillCount"] + 1;
+            PhotonNetwork.CurrentRoom.GetPlayer(actorNum).SetCustomProperties(myHashtable);
             Died();
+        }
         
+    }
+    public void Dameged(int _damage)
+    {
+        throw new System.NotImplementedException();
     }
     public void Died()
     {
         mAnimator.SetBool("IsDed", true);
 
+        if (PhotonView.IsMine)
+        {
+            ExitGames.Client.Photon.Hashtable myHashtable = PhotonNetwork.LocalPlayer.CustomProperties;
+            
+            int harfScore = (int)myHashtable["Score"]/2;
+
+            int spawnCount = harfScore / 10;
+
+            Debug.Log(spawnCount);
+            for (int i = 0; i < spawnCount; i++)
+            {
+                ItemObjectFactory.Instance.RequestCreateOneType(transform.position, "Coin");
+            }
+
+            myHashtable["Score"] = 0;
+            myScore = 0;
+            PhotonNetwork.LocalPlayer.SetCustomProperties(myHashtable);
+        }
         state.isDed = true;
   
         StartCoroutine(DiedAction());
     }
+    
     public IEnumerator DiedAction()
     {
         yield return new WaitForSeconds(0.5f);
@@ -105,7 +179,7 @@ public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction
     [PunRPC]
     private void OffDedAni()
     {
-        mAnimator.SetBool("IsDed", false);
+        mAnimator.SetBool("IsDed", false); 
     }
     public IEnumerator IHit()
     {
@@ -127,5 +201,5 @@ public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction
         transform.GetChild(0).localPosition = originalPosition;
     }
 
-
+  
 }

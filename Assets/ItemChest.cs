@@ -33,11 +33,14 @@ public class ItemChest : MonoBehaviour , IHitAction , IDamaged
         {
             mAnimator.SetBool("Open", true);
             StartCoroutine(ItemRandomSpawnManager.Instance.RandomSpawn(Index));
-        
         }
     }
 
-   
+    void IDamaged.Dameged(int _damage, int Actnum)
+    {
+        throw new System.NotImplementedException();
+    }
+
     public IEnumerator IHit()
     {
         float shakeDuration = 0.5f;
@@ -58,4 +61,5 @@ public class ItemChest : MonoBehaviour , IHitAction , IDamaged
         transform.localPosition = originalPosition;
     }
 
+   
 }

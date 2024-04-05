@@ -46,7 +46,6 @@ public class CharacterMoveAbility : CharacterAbility
         _owner.mAnimator.SetFloat("Move", movement.magnitude);
         movement = Camera.main.transform.TransformDirection(movement);
 
-
         //중력
         movement.y = _yVelocity;
         _yVelocity += gravity * Time.deltaTime;

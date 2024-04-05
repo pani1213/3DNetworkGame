@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using UnityEngine.SocialPlatforms.Impl;
 
 
 public class CharacterAttackAbility : CharacterAbility
@@ -52,13 +53,45 @@ public class CharacterAttackAbility : CharacterAbility
             GameObject vfxObj = PhotonNetwork.Instantiate("HitVFX",((other.transform.position + transform.position) / 2f) + (Vector3.up * 0.7f), Quaternion.identity);
             vfxObj.GetComponent<ParticleSystem>().Play();
 
-
             PhotonView photonView = other.GetComponent<PhotonView>();
+
+         
             if (photonView != null)
             {
-                photonView.RPC("Dameged", RpcTarget.All, _owner.state.Damage);
+                Character otherChar;
+                int score = 1;
+                if (TryGetComponent<Character>(out otherChar))
+                {
+                    score = otherChar.myScore;
+                }
+
+                photonView.RPC("Dameged", RpcTarget.All, _owner.state.Damage,PhotonNetwork.LocalPlayer.ActorNumber);
+
+
+                if (otherChar.state.Health <= 0)
+                {
+                    if (_owner.PhotonView.IsMine)
+                    {
+                       // SetProperties();
+                        if (otherChar != null)
+                        { 
+                            ExitGames.Client.Photon.Hashtable myHashtable = PhotonNetwork.LocalPlayer.CustomProperties;                        
+                            myHashtable["Score"] = (int)myHashtable["Score"] + score/2;
+                            PhotonNetwork.SetPlayerCustomProperties(myHashtable);
+                        }
+                    }
+                }
+
             }
+
         }
+    }
+    private void SetProperties()
+    {
+        ExitGames.Client.Photon.Hashtable myHashtable = PhotonNetwork.LocalPlayer.CustomProperties;
+        myHashtable["KillCount"] = (int)myHashtable["KillCount"] + 1;
+        Debug.Log($"{myHashtable["KillCount"]} , killcount");
+        PhotonNetwork.LocalPlayer.SetCustomProperties(myHashtable);
     }
     [PunRPC]
     public void PlayAttackAnimation(int index)

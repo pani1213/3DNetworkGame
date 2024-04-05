@@ -2104,6 +2104,8 @@ MonoBehaviour:
   mAnimator: {fileID: 2913677980900894624}
   controller: {fileID: 5265756729917457182}
   CharacterCollider: {fileID: 0}
+  myScore: 0
+  WearPon: {fileID: 7049944507906822957}
 --- !u!114 &4381516629299955551
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3854,6 +3856,11 @@ PrefabInstance:
 --- !u!65 &5659321346493115085 stripped
 BoxCollider:
   m_CorrespondingSourceObject: {fileID: 1904641468434232735, guid: 3617e4093ca8d5145986d37c89cfd692, type: 3}
+  m_PrefabInstance: {fileID: 6117954915076792146}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &7049944507906822957 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3832907126045494399, guid: 3617e4093ca8d5145986d37c89cfd692, type: 3}
   m_PrefabInstance: {fileID: 6117954915076792146}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &7682507100583414167 stripped

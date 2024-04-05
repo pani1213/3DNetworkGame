@@ -14,5 +14,6 @@ public class PlayerFindManager : Singleton<PlayerFindManager>
         freeLookCamera.Follow = character.transform;
         freeLookCamera.LookAt = character.transform;
         CharacterStateUI.Instance.InIt();
+        FindObjectOfType<MonsterController>()._playerTransform = character.transform;
     }
 }

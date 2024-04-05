@@ -9,7 +9,6 @@ public class CharacterCanvasAbility : CharacterAbility//, IPunObservable
     Canvas myCanvas;
     public Text NickNameTextUI;
     public Image HP_BarUI, Staminar_BarUI;
-
     private void Start()
     {
         myCanvas = GetComponent<Canvas>();

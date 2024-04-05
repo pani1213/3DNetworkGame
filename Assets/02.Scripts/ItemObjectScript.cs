@@ -16,7 +16,9 @@ public class ItemObjectScript : MonoBehaviourPun, IItemUse
         //randomvec.y = 1f;
         //randomvec.Normalize();
         //body.AddForce(randomvec * 3,ForceMode.Impulse);
+
     }
+    
 
     public IncreaseStat UseItem()
     {
