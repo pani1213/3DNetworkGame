@@ -1,205 +1,361 @@
+using Cinemachine.Utility;
+using Photon.Pun;
+using Photon.Pun.Demo.Cockpit.Forms;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UIElements;
 
-[RequireComponent(typeof(CharacterController))]
-public class MonsterController : MonoBehaviour, IDamaged 
+[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(NavMeshAgent))]
+public class MonsterController : MonoBehaviour 
 {
-    private enum EnemeyState
+    // 곰 상태 상수(열거형)
+    public enum BearState
     {
         Idle,
         Patrol,
         Trace,
-        Attack,
         Return,
-        Damaged,
-        Die
+        Attack,
     }
-    public int hp = 15;
+
+    private BearState _state = BearState.Idle;
+
+    public Animator MyAnimatior;
+    public NavMeshAgent Agent;
+
+    private List<Character> _characterList = new List<Character>();
+    public SphereCollider CharacterDetectCollider;
+    private Character _targetCharacter;
+    public void setCharacter(Character _character) => _targetCharacter = _character;
+
+    public Stat Stat;
+
+    // [Idle]
+    public float TraceDetectRange = 5f;
+    public float IdleMaxTime = 5f;
+    private float _idleTime = 0f;
+
+    // [Patrol]
+    public Transform PatrolDestination;
+
+    // [Return]
+    private Vector3 _startPosition;
+
+    // [Attack]
+    public float AttackDistance = 3f;
+    private float _attackTimer = 0f;
 
 
-    private EnemeyState _currentState;
-    public float FindDistance = 8f;
-    public Transform _playerTransform;
-    // 공격 가능 범위
-    public float AttackDistance = 2f; 
-    public float MoveSpeed = 5f;
-    private CharacterController controller;
-
-    private float _currentTime;
-    private float _attackDelay = 2f;
-
-    private Vector3 _originPos;		// 초기 위치 저장용 변수
-    public float MoveDistance = 20f;    // 이동 가능 범위
-    private void Awake()
-    {
-        controller = GetComponent<CharacterController>();
-    }
     private void Start()
     {
-        // 최초의 에너미 상태는 '대기'
-        _currentState = EnemeyState.Idle;
-        _originPos = transform.position; // 자신의 초기 위치 저장하기
-        //_playerTransform = PlayerFindManager.Instance.character.transform;
+        Agent.speed = Stat.MoveSpeed;
 
+        _startPosition = transform.position;
 
+        CharacterDetectCollider.radius = TraceDetectRange;
+    }
+    private void OnTriggerEnter(Collider col)
+    {
+        if (col.CompareTag("Player"))
+        {
+            Character character = col.GetComponent<Character>();
+            if (!_characterList.Contains(character))
+            {
+                Debug.Log("새로운 인간을 찾았다!");
+                _characterList.Add(character);
+            }
+        }
     }
 
+
+    // 매 프레임마다 해당 상태별로 정해진 행동을 한다.
     private void Update()
     {
-        if (_playerTransform == null)
+        // 조기 반환
+        if (!PhotonNetwork.IsMasterClient)
+        {
             return;
-        // 현재 상태를 체크해 해당 상태별로 정해진 기능을 수행하게 하고 싶다.
-        switch (_currentState)
+        }
+
+        switch (_state)
         {
-            case EnemeyState.Idle:
-                Idle();
-                break;
-            case EnemeyState.Patrol:
-                Patrol();
-                break;
-            case EnemeyState.Trace:
-                Trace();
-                break;
-            case EnemeyState.Attack:
-                Attack();
-                break;
-            case EnemeyState.Return:
-                Return();
-                break;
-            case EnemeyState.Damaged:
-                Damaged();
-                break;
-            case EnemeyState.Die:
-                Die();
-                break;
+            case BearState.Idle:
+                {
+                    Idle();
+                    break;
+                }
+
+            case BearState.Patrol:
+                {
+                    Patrol();
+                    break;
+                }
+
+            case BearState.Trace:
+                {
+                    Trace();
+                    break;
+                }
+
+            case BearState.Return:
+                {
+                    Return();
+                    break;
+                }
+
+            case BearState.Attack:
+                {
+                    Attack();
+                    break;
+                }
         }
     }
 
-    public void Idle()
+    private void Idle()
     {
-    
-
-        if (Vector3.Distance(transform.position, _playerTransform.position) < FindDistance)
+        // 그러다가.. [대기 시간]이 너무 많으면 (정찰 상태로 전이)
+        _idleTime += Time.deltaTime;
+        if (_idleTime >= IdleMaxTime)
         {
-            _currentState = EnemeyState.Trace;
-            Debug.Log("상태 전환: Idle -> Trace");
+            _idleTime = 0f;
+            SetRandomPatrolDestination();
+            _state = BearState.Patrol;
+            RequestPlayAnimation("Run");
+            Debug.Log("Idle -> Patrol");
+        }
+
+        // 그러다가.. [플레이어]가 [감지 범위]안에 들어오면 플레이어 (추적 상태로 전이)
+        _targetCharacter = FindTarget(TraceDetectRange);
+        if (_targetCharacter != null)
+        {
+            _startPosition = transform.position;
+            SetRandomPatrolDestination();
+            _state = BearState.Trace;
+            RequestPlayAnimation("Run");
+            Debug.Log("Idle -> Trace");
         }
     }
-    public void Patrol()
-    {
-        
-    }
-    public void Trace()
-    {
-        if (Vector3.Distance(transform.position, _originPos) > MoveDistance)
-        {
-            // 현재 상태를 복귀(Return)로 전환한다.
-            _currentState = EnemeyState.Return;
-        }
-        else if (Vector3.Distance(transform.position, _playerTransform.position) > AttackDistance)
-        {
-            // 이동 방향 설정
-            Vector3 dir = (_playerTransform.position - transform.position).normalized;
 
-            // 캐릭터 콘트롤러를 이용해 이동하기
-            controller.Move(dir * MoveSpeed * Time.deltaTime);
-        }
-        else
-        {
-            _currentState = EnemeyState.Attack;
-        }
-    } 
-    public void Attack()
+    private void Patrol()
     {
-        if (Vector3.Distance(transform.position, _playerTransform.position) < AttackDistance)
+        if (PatrolDestination == null)
         {
-            _currentTime += Time.deltaTime;
-            if (_currentTime > _attackDelay)
+            PatrolDestination = GameObject.Find("Patrol").transform;
+        }
+
+        // [패트롤 구역]까지 간다.
+        Agent.destination = PatrolDestination.position;
+        Agent.stoppingDistance = 0f;
+
+        // IF [플레이어]가 [감지 범위]안에 들어오면 플레이어 (추적 상태로 전이)
+        _targetCharacter = FindTarget(TraceDetectRange);
+        if (_targetCharacter != null)
+        {
+            _state = BearState.Trace;
+            RequestPlayAnimation("Run");
+            Debug.Log("Patrol -> Trace");
+        }
+
+        // IF [패트롤 구역]에 도착하면 (복귀 상태로 전이)
+        if (!Agent.pathPending && Agent.remainingDistance <= 0.1f)
+        {
+            _state = BearState.Return;
+            RequestPlayAnimation("Run");
+            Debug.Log("Patrol -> Return");
+        }
+    }
+
+    private void Return()
+    {
+        // [시작 위치]까지 간다.
+        Agent.destination = _startPosition;
+        Agent.stoppingDistance = 0f;
+
+        if (!Agent.pathPending && Agent.remainingDistance <= 0.1f)
+        {
+            _state = BearState.Idle;
+            RequestPlayAnimation("Idle");
+            Debug.Log("Return -> Idle");
+        }
+
+        // IF [플레이어]가 [감지 범위]안에 들어오면 플레이어 (추적 상태로 전이)
+        _targetCharacter = FindTarget(TraceDetectRange);
+        if (_targetCharacter != null)
+        {
+            _state = BearState.Trace;
+            RequestPlayAnimation("Run");
+            Debug.Log("Return -> Trace");
+        }
+    }
+
+    private void Trace()
+    {
+        // 타겟이 게임에서 나가면 복귀
+        if (_targetCharacter == null)
+        {
+            Debug.Log("Trace -> Return");
+            _state = BearState.Return;
+            return;
+        }
+
+        // 타겟이 죽거나 너무 멀어지면 복귀
+        Agent.destination = _targetCharacter.transform.position;
+        if (_targetCharacter.state.isDed|| GetDistance(_targetCharacter.transform) > TraceDetectRange)
+        {
+            Debug.Log("Trace -> Patrol");
+            _startPosition = transform.position;
+            SetRandomPatrolDestination();
+            _state = BearState.Patrol;
+            return;
+        }
+
+        // 타겟이 가까우면 공격 상태로 전이
+        if (GetDistance(_targetCharacter.transform) <= AttackDistance)
+        {
+            Agent.isStopped = true;
+            Debug.Log("Trace -> Attack");
+            MyAnimatior.Play("Idle");
+
+            Agent.isStopped = true;
+            Agent.ResetPath();
+            Agent.stoppingDistance = AttackDistance;
+
+            _state = BearState.Attack;
+            return;
+        }
+    }
+
+    private void Attack()
+    {
+        // 타겟이 게임에서 나가면 복귀
+        if (_targetCharacter == null)
+        {
+            Debug.Log("Trace -> Return");
+            Agent.isStopped = false;
+            _startPosition = transform.position;
+            SetRandomPatrolDestination();
+            _state = BearState.Trace;
+            return;
+        }
+
+        // 타겟이 죽거나 공격 범위에서 벗어나면 복귀
+        Agent.destination = _targetCharacter.transform.position;
+        if (_targetCharacter.state.isDed || GetDistance(_targetCharacter.transform) > AttackDistance)
+        {
+            Debug.Log("Trace -> Return");
+            Agent.isStopped = false;
+            _startPosition = transform.position;
+            _state = BearState.Idle;
+            return;
+        }
+
+        _attackTimer += Time.deltaTime;
+        if (_attackTimer >= Stat.AttackCoolTime)
+        {
+            transform.LookAt(_targetCharacter.transform);
+
+            _attackTimer = 0f;
+            RequestPlayAnimation("Attack");
+        }
+    }
+
+
+
+    // 나와의 거리가 distance보다 짧은 플레이어를 반환
+    private Character FindTarget(float distance)
+    {
+        _characterList.RemoveAll(c => c == null);
+
+        Vector3 myPosition = transform.position;
+        foreach (Character character in _characterList)
+        {
+            if (character.state.isDed)
             {
-                print("공격");
-                _playerTransform.GetComponent<IDamaged>().Dameged(10);
-                _currentTime = 0;
+                continue;
             }
-            
-        }
-        // 그렇지 않다면, 현재 상태를 이동(Move)으로 전환한다(재추격 실시).
-        else
-        {
-            _currentState = EnemeyState.Trace;
-            Debug.Log("상태 전환: Attack -> Trace");
-            _currentTime = _attackDelay;
-        }
-    }
-    public void Return()
-    {
-        // 만일, 초기 위치에서의 거리가 0.1f 이상이라면 초기 위치 쪽으로 이동한다.
-        if (Vector3.Distance(transform.position, _originPos) > 0.1f)
-        {
-            Vector3 dir = (_originPos - transform.position).normalized;
-            controller.Move(dir * MoveSpeed * Time.deltaTime);
-        }
-        // 그렇지 않다면, 자신의 위치를 초기 위치로 조정하고 현재 상태를 대기로 전환한다.
-        else
-        {
-            transform.position = _originPos;
 
-            // hp를 다시 회복한다.
-            // hp = maxHp;
-            _currentState = EnemeyState.Idle;
-            Debug.Log("상태 전환: Return -> Idle");
+            if (Vector3.Distance(character.transform.position, myPosition) <= distance)
+            {
+                return character;
+            }
         }
-    }  
-    public void Damaged()
-    {
-        StartCoroutine(IHit());
-    } 
-    public void Die()
-    {
-        StopAllCoroutines();
-        StartCoroutine(Die_Coroutine());
-    }
-    IEnumerator Die_Coroutine()
-    {
-        controller.enabled = false;
 
-        // 2초 동안 기다린 후에 자기 자신을 제거한다.
-        yield return new WaitForSeconds(2f);
-        Debug.Log("소멸!");
-        Destroy(gameObject);
+        return null;
     }
-    public void Dameged(int _damage)
+    private List<Character> FindTargets(float distance)
     {
-        if (_currentState == EnemeyState.Damaged || _currentState == EnemeyState.Die || _currentState == EnemeyState.Return)
+        _characterList.RemoveAll(c => c == null);
+
+        List<Character> characters = new List<Character>();
+
+        Vector3 myPosition = transform.position;
+        foreach (Character character in _characterList)
         {
+            if (character.state.isDed)
+            {
+                continue;
+            }
+
+            if (Vector3.Distance(character.transform.position, myPosition) <= distance)
+            {
+                characters.Add(character);
+            }
+        }
+
+        return characters;
+    }
+
+
+    private float GetDistance(Transform otherTransform)
+    {
+        return Vector3.Distance(transform.position, otherTransform.position);
+    }
+
+
+    public void AttackAction()
+    {
+        if (!PhotonNetwork.IsMasterClient)
             return;
-        }
+        
 
-        hp -= _damage;
-        if (hp > 0)
+        Debug.Log("AttackAction!");
+        // 일정 범위 안에 있는 모든 플레이어에게 데미지를 주고 싶다.
+        List<Character> targets = FindTargets(AttackDistance + 0.1f);
+        foreach (Character target in targets)
         {
-            _currentState = EnemeyState.Damaged;
-            print("상태 전환: Any state -> Damaged");
-            Damaged();
-        }
-        // 그렇지 않다면 죽음 상태로 전환한다.
-        else
-        {
-            _currentState = EnemeyState.Die;
-            print("상태 전환: Any state -> Die");
-            Die();
-        }
+            Vector3 dir = (target.transform.position - transform.position).normalized;
+            int viewAngle = 160 / 2;
+            float angle = Vector3.Angle(transform.forward, dir);
+            Debug.Log(angle);
+            if (Vector3.Angle(transform.forward, dir) < viewAngle)
+            {
+                target.PhotonView.RPC("Damaged", RpcTarget.All, Stat.Damage, -1);
+            }
 
-    } 
-    public IEnumerator IHit()
-    {
-        yield return new WaitForSeconds(0.5f);
-        _currentState = EnemeyState.Trace;
+        }
     }
 
-    public void Dameged(int _damage, int Actnum)
+    private void RequestPlayAnimation(string animationName)
     {
-        throw new System.NotImplementedException();
+        GetComponent<PhotonView>().RPC(nameof(PlayAnimation), RpcTarget.All, animationName);
     }
+
+    [PunRPC]
+    private void PlayAnimation(string animationName)
+    {
+        MyAnimatior.Play(animationName);
+    }
+
+
+    private void SetRandomPatrolDestination()
+    {
+        List<GameObject> randomPoints = GameObject.FindGameObjectsWithTag("PatrolPoint").ToList();
+        PatrolDestination = randomPoints[UnityEngine.Random.Range(0, randomPoints.Count)].transform;
+    }
+
+  
 }

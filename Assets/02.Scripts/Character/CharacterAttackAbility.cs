@@ -65,7 +65,7 @@ public class CharacterAttackAbility : CharacterAbility
                     score = otherChar.myScore;
                 }
 
-                photonView.RPC("Dameged", RpcTarget.All, _owner.state.Damage,PhotonNetwork.LocalPlayer.ActorNumber);
+                photonView.RPC("Dameged", RpcTarget.All, _owner.state.Damage);
 
 
                 if (otherChar.state.Health <= 0)
@@ -81,9 +81,7 @@ public class CharacterAttackAbility : CharacterAbility
                         }
                     }
                 }
-
             }
-
         }
     }
     private void SetProperties()

@@ -8,6 +8,7 @@ TagManager:
   - Bullet
   - VFX_FootStep
   - Item
+  - PatrolPoint
   layers:
   - Default
   - TransparentFX

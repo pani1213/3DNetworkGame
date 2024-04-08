@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class State 
+public class Stat 
 {
     public int MaxHealth;
     public float Health;

@@ -1,9 +1,6 @@
 using Photon.Pun;
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
-using Unity.VisualScripting;
 using UnityEngine;
 [RequireComponent(typeof(PhotonView))]
 public class ItemRandomSpawnManager : Singleton<ItemRandomSpawnManager>
@@ -34,7 +31,6 @@ public class ItemRandomSpawnManager : Singleton<ItemRandomSpawnManager>
         {
             //itemChests[UnityEngine.Random.Range(0, itemChests.Length)].gameObject.SetActive(true);
             //IsOn = true;
-            Debug.Log("리스폰");
             int random= UnityEngine.Random.Range(0, itemChests.Length);
             PhotonView.RPC(nameof(ChestSetActive), RpcTarget.AllBuffered, true, random);
         }

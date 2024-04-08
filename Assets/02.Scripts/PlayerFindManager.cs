@@ -11,9 +11,10 @@ public class PlayerFindManager : Singleton<PlayerFindManager>
     public void InIt()
     {
         playerCharacter = character.GetComponent<Character>();
+        playerCharacter.SetCharacterType(PhotonManager.instance.characterType);
         freeLookCamera.Follow = character.transform;
         freeLookCamera.LookAt = character.transform;
         CharacterStateUI.Instance.InIt();
-        FindObjectOfType<MonsterController>()._playerTransform = character.transform;
+        FindObjectOfType<MonsterController>().setCharacter(playerCharacter);
     }
 }

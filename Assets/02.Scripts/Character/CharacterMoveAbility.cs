@@ -1,14 +1,15 @@
 using Photon.Pun;
 using UnityEngine;
-using static UnityEngine.UI.GridLayoutGroup;
+
 
 [RequireComponent(typeof(CharacterController))]
 public class CharacterMoveAbility : CharacterAbility
 {
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
-
     public float rotationSpeed = 10.0f; // 캐릭터 방향 회전속도
+
+ 
 
     public float _yVelocity;
     public float gravity = -9.81f;
@@ -65,7 +66,6 @@ public class CharacterMoveAbility : CharacterAbility
         //인풋 있을때만 실행
         if (moveHorizontal != 0f || moveVertical!= 0f)
         {
-            Debug.Log(0);
             footStpeCoolTime += Time.deltaTime;
             if (footStpeCoolTime > 0.5f)
             {

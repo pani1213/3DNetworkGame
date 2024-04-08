@@ -2,9 +2,6 @@ using Cinemachine;
 using Photon.Pun;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SocialPlatforms;
-using UnityEngine.SocialPlatforms.Impl;
-using static UnityEngine.UI.GridLayoutGroup;
 
 
 
@@ -15,7 +12,7 @@ using static UnityEngine.UI.GridLayoutGroup;
 public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction 
 {
     public PhotonView PhotonView;
-    public State state;
+    public Stat state;
     [SerializeField] private CinemachineImpulseSource _source;
     public Animator mAnimator;
     public CharacterController controller;
@@ -24,6 +21,24 @@ public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction
     Vector3 recevedPosition;
     Quaternion recevedRotation;
     public GameObject WearPon;
+
+    public GameObject[] womanObj;
+    public GameObject[] manObj;
+
+
+    public void SetCharacterType(CharacterType characterType)
+    {
+        if (characterType == CharacterType.man)
+        {
+            for (int i = 0; i < manObj.Length; i++)
+                manObj[i].SetActive(true);
+        }
+        else
+            for (int i = 0; i < womanObj.Length; i++)
+                womanObj[i].SetActive(true);
+
+        
+    }
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
@@ -104,30 +119,26 @@ public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction
        //    transform.rotation = Quaternion.Slerp(transform.rotation, recevedRotation, Time.deltaTime * 20);
        //}
     }
+   
     [PunRPC]
-    public void Dameged(int _damage,int actorNum)
+    public void Dameged(int _damage)
     {
         state.Health -= _damage;
 
 
         if (PhotonView.IsMine)
-        { 
+        {
             _source.GenerateImpulse();
             StartCoroutine(HitUIManager.Instance.FadeImageCoroutine());
         }
         StartCoroutine(IHit());
         if (state.Health <= 0)
         {
-            ExitGames.Client.Photon.Hashtable myHashtable = PhotonNetwork.CurrentRoom.GetPlayer(actorNum).CustomProperties;
-            myHashtable["KillCount"] = (int)myHashtable["KillCount"] + 1;
-            PhotonNetwork.CurrentRoom.GetPlayer(actorNum).SetCustomProperties(myHashtable);
+            //ExitGames.Client.Photon.Hashtable myHashtable = PhotonNetwork.CurrentRoom.GetPlayer(actorNum).CustomProperties;
+            //myHashtable["KillCount"] = (int)myHashtable["KillCount"] + 1;
+            //PhotonNetwork.CurrentRoom.GetPlayer(actorNum).SetCustomProperties(myHashtable);
             Died();
         }
-        
-    }
-    public void Dameged(int _damage)
-    {
-        throw new System.NotImplementedException();
     }
     public void Died()
     {
@@ -200,6 +211,4 @@ public class Character : MonoBehaviour , IPunObservable , IDamaged, IHitAction
         }
         transform.GetChild(0).localPosition = originalPosition;
     }
-
-  
 }

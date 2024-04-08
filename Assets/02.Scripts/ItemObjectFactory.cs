@@ -34,7 +34,6 @@ public class ItemObjectFactory : Singleton<ItemObjectFactory>
         {
             photonView.RPC(nameof(Delete), RpcTarget.MasterClient, viewID);
         }
-
     }
     [PunRPC]
     private void Create( Vector3 position)
@@ -60,7 +59,6 @@ public class ItemObjectFactory : Singleton<ItemObjectFactory>
     [PunRPC]
     private void CreateOneType(Vector3 position, string _objType)
     {
-        Debug.Log(0);
         PhotonNetwork.InstantiateRoomObject(_objType, position + Random.insideUnitSphere, Quaternion.identity);
     }
     [PunRPC]

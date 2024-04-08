@@ -362,7 +362,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5918393670486035006
 Transform:
   m_ObjectHideFlags: 0
@@ -942,7 +942,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6764446495572880994
 Transform:
   m_ObjectHideFlags: 0
@@ -1634,7 +1634,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8164821874939986073
 Transform:
   m_ObjectHideFlags: 0
@@ -1785,7 +1785,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1494952921806635559
 Transform:
   m_ObjectHideFlags: 0
@@ -2106,6 +2106,20 @@ MonoBehaviour:
   CharacterCollider: {fileID: 0}
   myScore: 0
   WearPon: {fileID: 7049944507906822957}
+  womanObj:
+  - {fileID: 5674607147542763479}
+  - {fileID: 7000538166906393872}
+  - {fileID: 3051272567079643986}
+  - {fileID: 7317997696643204918}
+  - {fileID: 1648099930279456313}
+  - {fileID: 1574372387345620903}
+  manObj:
+  - {fileID: 2294286553017231718}
+  - {fileID: 5490629410393272976}
+  - {fileID: 4642980974955848662}
+  - {fileID: 5920720096101458369}
+  - {fileID: 7342739901227339649}
+  - {fileID: 710802540158875829}
 --- !u!114 &4381516629299955551
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2269,7 +2283,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8085115703683147513
 Transform:
   m_ObjectHideFlags: 0
@@ -2821,7 +2835,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6514671936988611263
 Transform:
   m_ObjectHideFlags: 0

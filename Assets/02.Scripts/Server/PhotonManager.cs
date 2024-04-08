@@ -3,10 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+
+public enum CharacterType { man,woman}
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
     public static PhotonManager instance;
     public bool isJoindRoom = false;
+
+
+    public CharacterType characterType = CharacterType.man;
+
     private void Awake()
     {
         if (instance == null)
@@ -38,9 +44,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedLobby()
     {
-        //Debug.Log("로비 입장");
+        Debug.Log("로비 입장");
 
-        PhotonNetwork.JoinOrCreateRoom("test", null, TypedLobby.Default);
+        //PhotonNetwork.JoinOrCreateRoom("test", null, TypedLobby.Default);
     }
     public override void OnCreatedRoom()
     {
@@ -49,7 +55,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
     public override void OnJoinedRoom()
     {
+        Debug.Log("방입장");
         isJoindRoom =true;
+        PhotonNetwork.LoadLevel("BattleScene");
     }
 
 }

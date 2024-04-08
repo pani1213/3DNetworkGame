@@ -22,24 +22,8 @@ public class ItemChest : MonoBehaviour , IHitAction , IDamaged
         mAnimator.SetBool("Open", false);
         HP = maxHP;
     }
-    [PunRPC]
-    public void Dameged(int _damage)
-    {
-        if (HP <= 0)
-            return;
 
-        HP -= _damage;
-        if (HP <= 0)
-        {
-            mAnimator.SetBool("Open", true);
-            StartCoroutine(ItemRandomSpawnManager.Instance.RandomSpawn(Index));
-        }
-    }
-
-    void IDamaged.Dameged(int _damage, int Actnum)
-    {
-        throw new System.NotImplementedException();
-    }
+  
 
     public IEnumerator IHit()
     {
@@ -60,6 +44,17 @@ public class ItemChest : MonoBehaviour , IHitAction , IDamaged
         }
         transform.localPosition = originalPosition;
     }
+    [PunRPC]
+    public void Dameged(int _damage)
+    {
+        if (HP <= 0)
+            return;
 
-   
+        HP -= _damage;
+        if (HP <= 0)
+        {
+            mAnimator.SetBool("Open", true);
+            StartCoroutine(ItemRandomSpawnManager.Instance.RandomSpawn(Index));
+        }
+    }
 }

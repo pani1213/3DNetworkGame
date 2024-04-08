@@ -61,6 +61,8 @@ MonoBehaviour:
   - SetProperties
   - SetScore
   - GrowUpWearpon
+  - IDamaged.Dameged
+  - PlayAnimation
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
