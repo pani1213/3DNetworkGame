@@ -20,7 +20,19 @@ public class UI_Lobby : MonoBehaviour
         }
 
         PhotonNetwork.NickName = nickname;
-        PhotonNetwork.JoinOrCreateRoom(roomID, null, TypedLobby.Default);
+
+        RoomOptions roomOptions = new RoomOptions();
+        roomOptions.MaxPlayers = 20;   // 입장 가능한 최대 플레이어 수
+        roomOptions.IsVisible = true; // 로비에서 방 목록에 노출할 것인가?
+        roomOptions.IsOpen = true; // 방에 다른 플레이어가 들어올 수 있는가?
+        roomOptions.EmptyRoomTtl = 1000 * 20;
+        roomOptions.CustomRoomProperties = new ExitGames.Client.Photon.Hashtable()
+        {
+            { "MasterNickName",nickname}
+        };
+        roomOptions.CustomRoomPropertiesForLobby = new string[] { "MasterNickName" };
+
+        PhotonNetwork.JoinOrCreateRoom(roomID, roomOptions, TypedLobby.Default);
     }
     public void ButtonActionCharacterTypeSet()
     {
@@ -44,6 +56,16 @@ public class UI_Lobby : MonoBehaviour
             Debug.Log(PhotonManager.instance.characterType);
             PhotonManager.instance.characterType = CharacterType.man;
         }
+    }
+
+    public void OnNickNameValueChanged(string newValue)
+    {
+        if (string.IsNullOrEmpty(newValue))
+        {
+            return;
+
+        }
+        PhotonNetwork.NickName = newValue;
     }
 
 }
